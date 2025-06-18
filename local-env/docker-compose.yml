@@ -1,0 +1,57 @@
+version: '3.8'
+services:
+  # ===== DATABASE LAYER =====
+  mongodb:
+    image: mongo:7.0
+    container_name: learning-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: learning_platform
+    volumes:
+      - mongodb_data:/data/db
+      - ./init-scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - learning-network
+
+  neo4j:
+    image: neo4j:5.13
+    container_name: learning-neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"  # Browser interface
+      - "7687:7687"  # Bolt protocol
+    environment:
+      NEO4J_AUTH: neo4j/password123
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - learning-network
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: learning-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - learning-network
+
+volumes:
+  mongodb_data:
+  neo4j_data:
+  neo4j_logs:
+  redis_data:
+
+networks:
+  learning-network:
+    driver: bridge
