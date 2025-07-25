@@ -48,6 +48,11 @@ down:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
 	@echo "✅ All services stopped!"
 
+# Restart all services
+dev-restart:
+	@make down
+	@make dev-up
+
 # Clean everything (removes volumes)
 clean:
 	@echo "🧹 Cleaning containers and volumes..."
