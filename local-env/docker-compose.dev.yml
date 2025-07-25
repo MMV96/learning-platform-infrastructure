@@ -5,7 +5,7 @@ services:
   content-processor:
     build: 
       context: ${MICROSERVICES_PATH}/content-processor
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: learning-content-processor
     ports:
       - "8001:8001"
