@@ -14,9 +14,29 @@ services:
       - MONGODB_URL=mongodb://admin:password123@mongodb:27017/learning_platform?authSource=admin
       - REDIS_URL=redis://redis:6379
     volumes:
-      # Hot reload per development
       - ${MICROSERVICES_PATH}/content-processor/src:/app/src
       - ${MICROSERVICES_PATH}/content-processor/uploads:/app/uploads
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - learning-network
+    restart: unless-stopped
+
+  quiz-generator:
+    build: 
+      context: ${MICROSERVICES_PATH}/quiz-generator
+      dockerfile: Dockerfile
+    container_name: learning-quiz-generator
+    ports:
+      - "8002:8002"
+    environment:
+      - ENVIRONMENT=development
+      - MONGODB_URL=mongodb://admin:password123@mongodb:27017/learning_platform?authSource=admin
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ${MICROSERVICES_PATH}/quiz-generator/src:/app/src
+      - ${MICROSERVICES_PATH}/quiz-generator/.env:/app/.env
     depends_on:
       - mongodb
       - redis
