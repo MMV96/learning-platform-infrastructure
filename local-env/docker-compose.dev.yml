@@ -16,6 +16,7 @@ services:
     volumes:
       - ${MICROSERVICES_PATH}/content-processor/src:/app/src
       - ${MICROSERVICES_PATH}/content-processor/uploads:/app/uploads
+      - ${MICROSERVICES_PATH}/content-processor/.env:/app/.env
     depends_on:
       - mongodb
       - redis
