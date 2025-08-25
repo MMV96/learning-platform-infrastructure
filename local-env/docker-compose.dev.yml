@@ -8,15 +8,15 @@ services:
       dockerfile: Dockerfile
     container_name: learning-content-processor
     ports:
-      - "8001:8001"
+      - "${CONTENT_PROCESSOR_PORT}:${CONTENT_PROCESSOR_PORT}"
     environment:
-      - NODE_ENV=development
-      - MONGODB_URL=mongodb://admin:password123@mongodb:27017/learning_platform?authSource=admin
-      - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=${ENVIRONMENT}
+      - MONGODB_URL=${MONGODB_URL}
+      - REDIS_URL=${REDIS_URL}
     volumes:
       - ${MICROSERVICES_PATH}/content-processor/src:/app/src
-      - ${MICROSERVICES_PATH}/content-processor/uploads:/app/uploads
       - ${MICROSERVICES_PATH}/content-processor/.env:/app/.env
+      - ${MICROSERVICES_PATH}/content-processor/uploads:/app/uploads
     depends_on:
       - mongodb
       - redis
@@ -30,17 +30,40 @@ services:
       dockerfile: Dockerfile
     container_name: learning-quiz-generator
     ports:
-      - "8002:8002"
+      - "${QUIZ_GENERATOR_PORT}:${QUIZ_GENERATOR_PORT}"
     environment:
-      - ENVIRONMENT=development
-      - MONGODB_URL=mongodb://admin:password123@mongodb:27017/learning_platform?authSource=admin
-      - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=${ENVIRONMENT}
+      - MONGODB_URL=${MONGODB_URL}
+      - REDIS_URL=${REDIS_URL}
     volumes:
       - ${MICROSERVICES_PATH}/quiz-generator/src:/app/src
       - ${MICROSERVICES_PATH}/quiz-generator/.env:/app/.env
     depends_on:
       - mongodb
       - redis
+    networks:
+      - learning-network
+    restart: unless-stopped
+
+  quiz-engine:
+    build: 
+      context: ${MICROSERVICES_PATH}/quiz-engine
+      dockerfile: Dockerfile
+    container_name: learning-quiz-engine
+    ports:
+      - "${QUIZ_ENGINE_PORT}:${QUIZ_ENGINE_PORT}"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT}
+      - MONGODB_URL=${MONGODB_URL}
+      - REDIS_URL=${REDIS_URL}
+      - QUIZ_GENERATOR_URL=http://quiz-generator:${QUIZ_GENERATOR_PORT}
+    volumes:
+      - ${MICROSERVICES_PATH}/quiz-engine/src:/app/src
+      - ${MICROSERVICES_PATH}/quiz-engine/.env:/app/.env
+    depends_on:
+      - mongodb
+      - redis
+      - quiz-generator
     networks:
       - learning-network
     restart: unless-stopped
